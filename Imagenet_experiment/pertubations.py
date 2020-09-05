@@ -6,7 +6,7 @@ from torchvision import transforms
 import torchvision.models as models
 import pickle 
 
-imagefolder='/home/liel/lrp_toolbox/lrp_output/val/'
+imagefolder='/home/liel/lrp_toolbox/lrp_output/val/' #write here the directory of the outputs of lrp/sa (the directory includes the images themseld and the scores files).
 files=os.listdir(imagefolder)
 channels=3
 h=224
@@ -15,6 +15,7 @@ imagenum=0
 lrp_vals={}
 images={}
 lrp_vals_all={}
+#creating the scores dictionary from the text files
 for f in files:
 	if 'as' in f:
 
@@ -57,13 +58,14 @@ with open(label_file,'r') as l:
 		img=line.split(' ')
 		labels[img[0]]=int(img[1])
 
-googlenet = models.googlenet(pretrained=True)
+googlenet = models.googlenet(pretrained=True)#we used pytorch pretrained googlenet model for the pertubations evaluation
 acc=0
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
 googlenet.eval()
 original_score=0
 scores=[]
+
 for j in range(25):
 	acc=0
 	for i,img in enumerate(images):
@@ -72,6 +74,8 @@ for j in range(25):
 		trans=transforms.ToTensor()
 		imgs=trans(imgs)
 		imgs=normalize(imgs)
+		
+		#the pertubation phase
 		for k in range(j):
 			#print(k)
 			loc=lrp_vals_all[img][k][0].split(',')
@@ -110,7 +114,9 @@ for j in range(25):
 	score=acc/len(list(images.keys()))
 	scores.append(score/original_score)
 	print(score,score/original_score)
-pickle.dump(scores,open('scores_lrp_9x9_1.pkl','wb'))
+	
+#rename the file according to the algorithm that created the scores in the image folder - of the algorthm is lrp write lrp, if sa write sa
+pickle.dump(scores,open('scores_lrp_9x9_1.pkl','wb')) 
 	
 	
 					
